@@ -1,0 +1,48 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  creationTimestamp: null
+  name: kcp
+  namespace: klape-insights
+spec:
+  params:
+  - name: git-revision
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        build.appstudio.openshift.io/application: control-plane-service
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: kcp
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      creationTimestamp: null
+      generateName: kcp-
+      labels:
+        build.appstudio.openshift.io/application: control-plane-service
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: kcp
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      namespace: klape-insights
+    spec:
+      params:
+      - name: git-url
+        value: https://github.com/kcp-dev/kcp
+      - name: output-image
+        value: quay.io/redhat-appstudio/user-workload:klape-insights-kcp-$(tt.params.git-revision)
+      - name: revision
+        value: main
+      pipelineRef:
+        bundle: quay.io/redhat-appstudio/hacbs-templates-bundle:3cc725816fef30d06420ff373b29c95e651ba308
+        name: docker-build
+      workspaces:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: appstudio
+        subPath: kcp/$(tt.params.git-revision)
+    status: {}
+status: {}
